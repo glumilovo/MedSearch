@@ -1,7 +1,7 @@
 import hashlib
 import datetime as date
 import json
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from flask import Flask, jsonify, request
 
@@ -107,34 +107,26 @@ def test():
 
 @app.route('/login', methods=['GET'])
 def login():
-    values = request.get_json()
-
-    # Убедитесь в том, что необходимые поля находятся среди POST-данных
-    required = ['login', 'password']
-    if not all(k in values for k in required):
-        return 'Missing values', 400
-
+    login = request.args['login']
+    password = request.args['password']
     for user in users:
-        if user['login'] == values['login'] and user['password'] == values['password']:
+        if user['login'] == login and user['password'] == password:
             token = uuid4()
-            response = {'success': True, 'access_token': token}
+            response = {'Success': True, 'AccessToken': token}
             accessList.append(token)
             return jsonify(response), 200
 
-    response = {'success': False, 'access_token': ''}
+    response = {'Success': False, 'AccessToken': ''}
     return jsonify(response), 200
 
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    values = request.get_json()
 
-    # Убедитесь в том, что необходимые поля находятся среди POST-данных
-    required = ['access_token']
-    if not all(k in values for k in required):
-        return 'Missing values', 400
+    access_token = UUID(request.args['access_token'])
 
-    accessList.remove(values['access_token'])
+
+    accessList.remove(access_token)
     return '', 200
 
 
